@@ -29,7 +29,6 @@ app.get("/search", (req, res) => {
     return res.status(400).json({ error: "Missing query" });
   }
 
-  // דמו נתונים (שלב הבא: אמיתי)
   const results = [
     {
       product: query,
@@ -41,7 +40,6 @@ app.get("/search", (req, res) => {
     }
   ];
 
-  // חישוב העסקה הכי טובה
   const best = results[0].prices.reduce((min, p) =>
     p.price < min.price ? p : min
   );
@@ -54,9 +52,4 @@ app.get("/search", (req, res) => {
   };
 
   res.json(response);
-});
-
-// 🔹 הפעלת השרת
-app.listen(5000, () => {
-  console.log("Backend running on port 5000");
 });
