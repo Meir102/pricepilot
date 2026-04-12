@@ -51,5 +51,10 @@ app.get("/search", (req, res) => {
     recommendation: `Buy at ${best.store} for ${best.price}₪`
   };
 
-  res.json(response);
+res.json(response);
+});
+
+// 🔹 הפעלת השרת
+app.listen(5000, () => {
+  console.log("Backend running on port 5000");
 });
