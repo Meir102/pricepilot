@@ -29,29 +29,44 @@ app.get("/search", (req, res) => {
     return res.status(400).json({ error: "Missing query" });
   }
 
-  const results = [
-    {
-      product: query,
-      prices: [
-        { store: "Amazon", price: 4200 },
-        { store: "eBay", price: 3990 },
-        { store: "KSP", price: 4100 }
-      ]
-    }
+  const prices = [
+    { store: "Amazon", price: 4200 },
+    { store: "eBay", price: 3990 },
+    { store: "KSP", price: 4100 }
   ];
 
-  const best = results[0].prices.reduce((min, p) =>
+  const best = prices.reduce((min, p) =>
     p.price < min.price ? p : min
   );
+
+  const avg =
+    prices.reduce((sum, p) => sum + p.price, 0) / prices.length;
+
+  // 🧠 החלטה חכמה
+  let decision = "";
+  let reason = "";
+
+  if (best.price < avg * 0.95) {
+    decision = "BUY NOW";
+    reason = "מחיר נמוך מהממוצע בשוק";
+  } else if (best.price > avg * 1.05) {
+    decision = "WAIT";
+    reason = "המחיר גבוה מהממוצע, סביר שיירד";
+  } else {
+    decision = "NORMAL";
+    reason = "מחיר באזור הממוצע";
+  }
 
   const response = {
     product: query,
     bestDeal: best,
-    allPrices: results[0].prices,
-    recommendation: `Buy at ${best.store} for ${best.price}₪`
+    averagePrice: Math.round(avg),
+    decision,
+    reason,
+    recommendation: `${decision} - ${reason}`
   };
 
-res.json(response);
+  res.json(response);
 });
 
 // 🔹 הפעלת השרת
