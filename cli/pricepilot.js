@@ -1,30 +1,51 @@
-#!/usr/bin/env node
+#!/data/data/com.termux/files/usr/bin/node
+if (cmd === "deploy") {
+  console.log("🚀 Deploying to Git + Render...");
 
+  try {
+    const status = execSync("git status --porcelain").toString();
+
+    if (status) {
+      console.log("📦 Changes detected, committing...");
+
+      execSync("git add .");
+      execSync('git commit -m "auto deploy"');
+    }
+
+    execSync("git push");
+
+    console.log("✅ Pushed to GitHub");
+    console.log("🔄 Render will auto-deploy now");
+  } catch (err) {
+    console.log("❌ Deploy failed:", err.message);
+  }
+}#!/usr/bin/env node
+const { execSync } = require("child_process");
 const fs = require("fs");
 
-const args = process.argv.slice(2);
-const command = args[0];
+const cmd = process.argv[2];
 
-if (command === "add-route") {
-  const route = args[1];
+if (cmd === "auto-commit") {
+  console.log("🤖 Running auto git workflow...");
 
-  const code = `
+  // בדיקה מה השתנה
+  const status = execSync("git status --porcelain").toString();
 
-app.get("${route}", (req, res) => {
-  res.json({ ok: true, route: "${route}" });
-});
+  if (!status) {
+    console.log("✅ No changes to commit");
+    process.exit(0);
+  }
 
-`;
+  // יצירת message חכם
+  let message = "auto update";
 
-  fs.appendFileSync("../backend/server.js", code);
-  console.log("✅ Route added:", route);
-}
+  if (status.includes("server.js")) message = "backend update";
+  if (status.includes("frontend")) message = "frontend update";
 
-if (command === "log") {
-  const text = args[1];
+  // Git flow
+  execSync("git add .");
+  execSync(`git commit -m "${message}"`);
+  execSync("git push");
 
-  const code = `console.log("${text}");\n`;
-  fs.appendFileSync("../backend/server.js", code);
-
-  console.log("✅ Log added");
+  console.log("🚀 Auto commit done:", message);
 }
