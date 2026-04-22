@@ -18,6 +18,7 @@ app.use(express.json());
 // 🔹 נתונים זמניים (בהמשך יהיה DB)
 let products = [];
 let trackedProducts = [];
+let alerted = new Set();
 
 // 🔹 קבלת כל המוצרים
 app.get("/products", (req, res) => {
@@ -109,11 +110,28 @@ setInterval(() => {
   trackedProducts.forEach(item => {
     const currentPrice = Math.floor(Math.random() * 1000) + 3500;
 
-    if (item.targetPrice && currentPrice <= item.targetPrice) {
+    const key = `${item.product}-${item.targetPrice}`;
+
+    if (
+      item.targetPrice &&
+      currentPrice <= item.targetPrice &&
+      !alerted.has(key)
+    ) {
       console.log(`🔥 ALERT: ${item.product} ירד ל-${currentPrice}₪`);
+
+      if (item.telegramId) {
+        sendTelegramMessage(
+          item.telegramId,
+          `🔥 מחיר ירד!\n📦 ${item.product}\n💰 עכשיו: ${currentPrice}₪\n🎯 יעד: ${item.targetPrice}₪`
+        );
+      }
+
+      alerted.add(key);
     }
   });
-}, 30000); // כל 30 שניות
+}, 30000);
+
+; // כל 30 שניות
 app.listen(5000, () => {
   console.log("Backend running on port 5000");
 });
