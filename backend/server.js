@@ -151,6 +151,16 @@ setInterval(async () => {
 }, 30000);
 
 // 🚀 הפעלת השרת
+app.get("/", (req, res) => {
+  res.json({
+    status: "🚀 PricePilot API is running",
+    endpoints: [
+      "/search?query=iphone",
+      "/track (POST)",
+      "/products"
+    ]
+  });
+});
 app.listen(5000, () => {
   console.log("Backend running on port 5000");
 });
