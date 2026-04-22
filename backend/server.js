@@ -100,12 +100,13 @@ app.post("/track", (req, res) => {
     return res.status(400).json({ error: "Missing product" });
   }
 
-  trackedProducts.push({
-    product,
-    targetPrice,
-    email,
-    telegramId
-  });
+trackedProducts.push({
+  product,
+  targetPrice,
+  email,
+  telegramId,
+  lastPrice: null
+});
 
   console.log("📌 New tracking:", trackedProducts);
 if (telegramId) {
@@ -123,13 +124,9 @@ setInterval(async () => {
   for (const item of trackedProducts) {
     const currentPrice = await getRealPrice(item.product);
 
-    const key = `${item.product}-${item.targetPrice}`;
-
     if (
-      item.targetPrice &&
       currentPrice &&
-      currentPrice <= item.targetPrice &&
-      !alerted.has(key)
+      (item.lastPrice === null || currentPrice < item.lastPrice)
     ) {
       console.log(`🔥 ALERT: ${item.product} ירד ל-${currentPrice}₪`);
 
@@ -140,12 +137,11 @@ setInterval(async () => {
         );
       }
 
-      alerted.add(key);
+      item.lastPrice = currentPrice;
     }
   }
 }, 30000);
 
-; // כל 30 שניות
 app.listen(5000, () => {
   console.log("Backend running on port 5000");
 });
