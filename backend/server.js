@@ -1,5 +1,14 @@
 const express = require("express");
 const cors = require("cors");
+const axios = require("axios");
+
+const TELEGRAM_TOKEN = "8463183093:AAEEqIoFbPoe4JrUdUBUMaerGO9MzOnoLG0";
+function sendTelegramMessage(chatId, message) {
+  axios.post(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+    chat_id: chatId,
+    text: message
+  });
+}
 
 const app = express();
 
@@ -85,6 +94,12 @@ app.post("/track", (req, res) => {
   });
 
   console.log("📌 New tracking:", trackedProducts);
+if (telegramId) {
+  sendTelegramMessage(
+    telegramId,
+    `🔥 התחלת מעקב על ${product}\n🎯 יעד מחיר: ${targetPrice}₪`
+  );
+}
 
   res.json({ message: "Tracking started" });
 });
