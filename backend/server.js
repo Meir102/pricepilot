@@ -8,6 +8,7 @@ app.use(express.json());
 
 // 🔹 נתונים זמניים (בהמשך יהיה DB)
 let products = [];
+let trackedProducts = [];
 
 // 🔹 קבלת כל המוצרים
 app.get("/products", (req, res) => {
@@ -69,7 +70,35 @@ app.get("/search", (req, res) => {
   res.json(response);
 });
 
+app.post("/track", (req, res) => {
+  const { product, targetPrice, email, telegramId } = req.body;
+
+  if (!product) {
+    return res.status(400).json({ error: "Missing product" });
+  }
+
+  trackedProducts.push({
+    product,
+    targetPrice,
+    email,
+    telegramId
+  });
+
+  console.log("📌 New tracking:", trackedProducts);
+
+  res.json({ message: "Tracking started" });
+});
+
 // 🔹 הפעלת השרת
+setInterval(() => {
+  trackedProducts.forEach(item => {
+    const currentPrice = Math.floor(Math.random() * 1000) + 3500;
+
+    if (item.targetPrice && currentPrice <= item.targetPrice) {
+      console.log(`🔥 ALERT: ${item.product} ירד ל-${currentPrice}₪`);
+    }
+  });
+}, 30000); // כל 30 שניות
 app.listen(5000, () => {
   console.log("Backend running on port 5000");
 });
