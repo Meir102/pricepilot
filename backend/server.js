@@ -1,6 +1,19 @@
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
+async function getRealPrice(product) {
+  try {
+    // דמו משופר (שלב ביניים)
+    // בעתיד נחבר API אמיתי
+    const base = 3500;
+    const variation = Math.floor(Math.random() * 800);
+
+    return base + variation;
+  } catch (err) {
+    console.log("Price fetch error:", err.message);
+    return null;
+  }
+}
 
 const TELEGRAM_TOKEN = "8463183093:AAEEqIoFbPoe4JrUdUBUMaerGO9MzOnoLG0";
 function sendTelegramMessage(chatId, message) {
@@ -106,14 +119,15 @@ if (telegramId) {
 });
 
 // 🔹 הפעלת השרת
-setInterval(() => {
-  trackedProducts.forEach(item => {
-    const currentPrice = Math.floor(Math.random() * 1000) + 3500;
+setInterval(async () => {
+  for (const item of trackedProducts) {
+    const currentPrice = await getRealPrice(item.product);
 
     const key = `${item.product}-${item.targetPrice}`;
 
     if (
       item.targetPrice &&
+      currentPrice &&
       currentPrice <= item.targetPrice &&
       !alerted.has(key)
     ) {
@@ -128,7 +142,7 @@ setInterval(() => {
 
       alerted.add(key);
     }
-  });
+  }
 }, 30000);
 
 ; // כל 30 שניות
