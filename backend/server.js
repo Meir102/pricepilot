@@ -120,20 +120,28 @@ if (telegramId) {
 });
 
 // 🔹 הפעלת השרת
+// 🔥 מנוע התראות חכם (אם עדיין לא נמצא בקובץ)
 setInterval(async () => {
   for (const item of trackedProducts) {
     const currentPrice = await getRealPrice(item.product);
 
-    if (
-      currentPrice &&
-      (item.lastPrice === null || currentPrice < item.lastPrice)
-    ) {
-      console.log(`🔥 ALERT: ${item.product} ירד ל-${currentPrice}₪`);
+    if (!currentPrice) continue;
+
+    const avgPrice = 4000;
+
+    const isFirstCheck = item.lastPrice === null;
+    const priceDropped = currentPrice < item.lastPrice * 0.97;
+    const crazyDeal = currentPrice < avgPrice * 0.9;
+    const reachedTarget =
+      item.targetPrice && currentPrice <= item.targetPrice;
+
+    if (isFirstCheck || priceDropped || crazyDeal || reachedTarget) {
+      console.log(`🔥 ALERT: ${item.product} - ${currentPrice}₪`);
 
       if (item.telegramId) {
         sendTelegramMessage(
           item.telegramId,
-          `🔥 מחיר ירד!\n📦 ${item.product}\n💰 עכשיו: ${currentPrice}₪\n🎯 יעד: ${item.targetPrice}₪`
+          `🔥 דיל שווה!\n📦 ${item.product}\n💰 מחיר: ${currentPrice}₪\n📉 ממוצע: ${avgPrice}₪\n🎯 יעד: ${item.targetPrice || "לא הוגדר"}`
         );
       }
 
@@ -142,6 +150,7 @@ setInterval(async () => {
   }
 }, 30000);
 
+// 🚀 הפעלת השרת
 app.listen(5000, () => {
   console.log("Backend running on port 5000");
 });
